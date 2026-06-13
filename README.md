@@ -58,8 +58,8 @@ Train and sample (with evaluation) for a dataset using the provided shell script
 
 ```bash
 bash scripts/run_shoppers.sh
+bash scripts/run_math_latex.sh
 bash scripts/run_biography.sh
-bash scripts/run_rel_arxiv.sh
 # ... see scripts/run_*.sh
 ```
 
