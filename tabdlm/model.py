@@ -309,10 +309,7 @@ class TabDLM(nn.Module):
         b = batch_size
         rep_token = tokenizer.encode("number", add_special_tokens=False)[0]
 
-        # Extract a clean dataset name (TabularDataset stores it as "tabular:<name>").
-        ds_name = getattr(train_ds, 'dataset_name', None)
-        if isinstance(ds_name, str) and ds_name.startswith("tabular:"):
-            ds_name = ds_name[len("tabular:"):]
+        ds_name = getattr(train_ds, "dataset_dir", None) or "unknown"
 
         all_samples = []
         num_generated = 0
@@ -365,9 +362,7 @@ class TabDLM(nn.Module):
                                       tokenizer, train_ds, description, save_description, top_k,
                                       keep_nan_samples=False):
         b = batch_size
-        ds_name = getattr(train_ds, 'dataset_name', None)
-        if isinstance(ds_name, str) and ds_name.startswith("tabular:"):
-            ds_name = ds_name[len("tabular:"):]
+        ds_name = getattr(train_ds, "dataset_dir", None) or "unknown"
 
         num_generated = 0
         while num_generated < num_samples:
@@ -415,9 +410,7 @@ class TabDLM(nn.Module):
         b = batch_size
         rep_token = tokenizer.encode("number", add_special_tokens=False)[0]
 
-        ds_name = getattr(train_ds, 'dataset_name', None)
-        if isinstance(ds_name, str) and ds_name.startswith("tabular:"):
-            ds_name = ds_name[len("tabular:"):]
+        ds_name = getattr(train_ds, "dataset_dir", None) or "unknown"
 
         all_samples = []
         num_generated = 0

@@ -59,15 +59,16 @@ def schema_prompt_construct(col_order, stas_info, dataset_name):
 
 
 class TabularDataset(Dataset):
-    def __init__(self,
-                 dataset_name,
-                 tokenizer,
-                 template_probs,
-                 max_len,
-                 answer_len,
-                 normalization='quantile',
-                 split='train',
-                 all_numerical=False):
+    def __init__(
+        self,
+        dataset_name,
+        tokenizer,
+        template_probs,
+        max_len,
+        answer_len,
+        normalization='quantile',
+        split='train',
+        all_numerical=False):
         self.tok = tokenizer
         self.tpl = template_probs
         self.max_len = max_len
@@ -82,7 +83,9 @@ class TabularDataset(Dataset):
 
         with open(f"data/tabular/{dataset_name}/info.json", "r") as f:
             self.stas_info = json.load(f)
-        self.dataset_name = "tabular:"+self.stas_info['name']
+        # --dataset_name: paths (data/, ckpt/, result/). info.json "name": prompt display only.
+        self.dataset_dir = dataset_name
+        self.prompt_table_name = "tabular:" + self.stas_info["name"]
         self.numerical_columns = [self.stas_info['column_names'][i] for i in self.stas_info['num_col_idx']]
 
         if self.all_numerical and dataset_name == 'magic':
@@ -104,8 +107,8 @@ class TabularDataset(Dataset):
 
         self.num_numerical_columns = len(self.numerical_columns)
         # construct statistic prompt
-        self.stats_prompt = stas_prompt_construct(self.col_order, self.stas_info['column_info'], self.dataset_name)
-        self.schema_prompt = schema_prompt_construct(self.col_order, self.stas_info['column_info'], self.dataset_name)
+        self.stats_prompt = stas_prompt_construct(self.col_order, self.stas_info['column_info'], self.prompt_table_name)
+        self.schema_prompt = schema_prompt_construct(self.col_order, self.stas_info['column_info'], self.prompt_table_name)
         if split == "train":
             print("SCHEMA PROMPT: " + self.schema_prompt)
             print("STATS PROMPT: " + self.stats_prompt)
@@ -237,7 +240,7 @@ class TabularDataset(Dataset):
             template):
         if template == "A":
             p = (f"{SPECIALS['BOS']}{SPECIALS['U_ST']}\n\n"
-                 f"Generate one {self.dataset_name} table row."
+                 f"Generate one {self.prompt_table_name} table row."
                  f"{SPECIALS['EOT']}{SPECIALS['A_ST']}\n\n")
 
             r = self.row_text(row)
@@ -248,7 +251,7 @@ class TabularDataset(Dataset):
         if template == "B":
             p = (f"{SPECIALS['BOS']}{SPECIALS['U_ST']}\n\n"
                  f"{self.schema_prompt}\n"
-                 f"Generate one {self.dataset_name} table row coherent with the above schema.\n"
+                 f"Generate one {self.prompt_table_name} table row coherent with the above schema.\n"
                  f"{SPECIALS['EOT']}{SPECIALS['A_ST']}\n\n")
             r = self.row_text(row)
             return p, r
@@ -257,7 +260,7 @@ class TabularDataset(Dataset):
             p = (f"{SPECIALS['BOS']}{SPECIALS['U_ST']}\n\n"
                  f"{self.schema_prompt}\n"
                  f"{self.stats_prompt}\n"
-                 f"Generate one {self.dataset_name} table row coherent with the above schema and stats.\n"
+                 f"Generate one {self.prompt_table_name} table row coherent with the above schema and stats.\n"
                  f"{SPECIALS['EOT']}{SPECIALS['A_ST']}\n\n")
             r = self.row_text(row)
             return p, r
@@ -323,7 +326,7 @@ class TabularDataset(Dataset):
             template):
         if template == "A":
             p = (f"{SPECIALS['BOS']}{SPECIALS['U_ST']}\n\n"
-                 f"Generate one {self.dataset_name} table row."
+                 f"Generate one {self.prompt_table_name} table row."
                  f"{SPECIALS['EOT']}{SPECIALS['A_ST']}\n\n")
             return p, self.get_num_value_idx(p)
 
@@ -332,7 +335,7 @@ class TabularDataset(Dataset):
         if template == "B":
             p = (f"{SPECIALS['BOS']}{SPECIALS['U_ST']}\n\n"
                  f"{self.schema_prompt}\n"
-                 f"Generate one {self.dataset_name} table row coherent with the above schema.\n"
+                 f"Generate one {self.prompt_table_name} table row coherent with the above schema.\n"
                  f"{SPECIALS['EOT']}{SPECIALS['A_ST']}\n\n")
             return p, self.get_num_value_idx(p)
 
@@ -340,7 +343,7 @@ class TabularDataset(Dataset):
             p = (f"{SPECIALS['BOS']}{SPECIALS['U_ST']}\n\n"
                  f"{self.schema_prompt}\n"
                  f"{self.stats_prompt}\n"
-                 f"Generate one {self.dataset_name} table row coherent with the above schema and stats.\n"
+                 f"Generate one {self.prompt_table_name} table row coherent with the above schema and stats.\n"
                  f"{SPECIALS['EOT']}{SPECIALS['A_ST']}\n\n")
             return p, self.get_num_value_idx(p)
 
